@@ -11,3 +11,6 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+GRANT ALL PRIVILEGES ON rate_your_neighbor.* TO 'user'@'%';
+FLUSH PRIVILEGES;

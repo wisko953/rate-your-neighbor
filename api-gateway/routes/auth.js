@@ -15,7 +15,6 @@ router.post('/register',
   ],
   async (req, res) => {
     try {
-      // Vérifier les erreurs de validation
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -26,7 +25,6 @@ router.post('/register',
 
       const { email, password } = req.body;
 
-      // Vérifier si l'email existe déjà
       const [existingUsers] = await db.query(
         'SELECT id FROM users WHERE email = ?',
         [email]
@@ -39,17 +37,14 @@ router.post('/register',
         });
       }
 
-      // Hasher le mot de passe
       const salt = await bcrypt.genSalt(10);
       const passwordHash = await bcrypt.hash(password, salt);
 
-      // Insérer le nouvel utilisateur
       const [result] = await db.query(
         'INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)',
         [email, passwordHash, 'user']
       );
 
-      // Créer un token JWT
       const token = jwt.sign(
         { id: result.insertId, email: email },
         process.env.JWT_SECRET,
@@ -68,7 +63,7 @@ router.post('/register',
       });
 
     } catch (error) {
-      console.error('Erreur lors de l\'inscription:', error);
+      console.error('Erreur inscription:', error);
       res.status(500).json({
         success: false,
         message: 'Erreur lors de l\'inscription'
@@ -95,7 +90,6 @@ router.post('/login',
 
       const { email, password } = req.body;
 
-      // Récupérer l'utilisateur
       const [users] = await db.query(
         'SELECT * FROM users WHERE email = ?',
         [email]
@@ -109,8 +103,6 @@ router.post('/login',
       }
 
       const user = users[0];
-
-      // Vérifier le mot de passe
       const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
       if (!isPasswordValid) {
@@ -120,7 +112,6 @@ router.post('/login',
         });
       }
 
-      // Créer un token JWT
       const token = jwt.sign(
         { id: user.id, email: user.email },
         process.env.JWT_SECRET,
@@ -139,7 +130,7 @@ router.post('/login',
       });
 
     } catch (error) {
-      console.error('Erreur lors de la connexion:', error);
+      console.error('Erreur connexion:', error);
       res.status(500).json({
         success: false,
         message: 'Erreur lors de la connexion'
