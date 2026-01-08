@@ -1,0 +1,32 @@
+const mysql = require('mysql2/promise');
+require('dotenv').config();
+
+// Configuration de la connexion à la base de données
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
+});
+
+// Tester la connexion
+const testConnection = async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log('Connecté à la base de données MySQL');
+    connection.release();
+  } catch (error) {
+    console.error('Erreur de connexion à la base de données:', error.message);
+    setTimeout(testConnection, 5000);
+  }
+};
+
+testConnection();
+
+module.exports = pool;
