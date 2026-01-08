@@ -1,13 +1,12 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Configuration de la connexion à la base de données
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.DB_HOST || 'mysql',
+  port: process.env.DB_PORT || 3306,
+  user: process.env.DB_USER || 'user',
+  password: process.env.DB_PASSWORD || 'password',
+  database: process.env.DB_NAME || 'rate_your_neighbor',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -15,14 +14,13 @@ const pool = mysql.createPool({
   keepAliveInitialDelay: 0
 });
 
-// Tester la connexion
 const testConnection = async () => {
   try {
     const connection = await pool.getConnection();
-    console.log('Connecté à la base de données MySQL');
+    console.log('API Gateway connectée à MySQL');
     connection.release();
   } catch (error) {
-    console.error('Erreur de connexion à la base de données:', error.message);
+    console.error('Erreur connexion MySQL:', error.message);
     setTimeout(testConnection, 5000);
   }
 };

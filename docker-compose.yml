@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # Tier 4 : Base de données
   mysql:
     image: mysql:8.0
     container_name: rate-your-neighbor-mysql
@@ -14,11 +15,13 @@ services:
       - "${DB_PORT}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./api-gateway/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
+    networks:
+      - app-network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
@@ -34,28 +37,52 @@ services:
       - "8080:80"
     depends_on:
       - mysql
+    networks:
+      - app-network
 
-  backend:
-    build: ./backend
-    container_name: rate-your-neighbor-backend
+  # Tier 2 : API Gateway / Authentication
+  api-gateway:
+    build: ./api-gateway
+    container_name: rate-your-neighbor-api-gateway
     restart: always
     ports:
-      - "5000:5000"
+      - "4000:4000"
     environment:
-      PORT: 5000
+      PORT: 4000
       DB_HOST: mysql
       DB_PORT: 3306
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_key}
+      JWT_SECRET: ${JWT_SECRET}
+      API_METIER_URL: http://api-metier:5000
     depends_on:
       mysql:
         condition: service_healthy
     volumes:
-      - ./backend:/app
+      - ./api-gateway:/app
       - /app/node_modules
+    networks:
+      - app-network
 
+  # Tier 3 : API Métier
+  api-metier:
+    build: ./api-metier
+    container_name: rate-your-neighbor-api-metier
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+    depends_on:
+      - mysql
+    volumes:
+      - ./api-metier:/app
+      - /app/node_modules
+    networks:
+      - app-network
+
+  # Tier 1 : Frontend
   frontend:
     build: ./frontend
     container_name: rate-your-neighbor-frontend
@@ -63,15 +90,21 @@ services:
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_API_URL: http://localhost:5000/api
+      REACT_APP_API_URL: http://localhost:4000/api
     depends_on:
-      - backend
+      - api-gateway
     volumes:
       - ./frontend:/app
       - /app/node_modules
     stdin_open: true
     tty: true
+    networks:
+      - app-network
 
 volumes:
   mysql_data:
     driver: local
+
+networks:
+  app-network:
+    driver: bridge
