@@ -1,10 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Your Neighbour | Le Club Privé</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-$END$
+
+<header class="navbar">
+    <div class="container nav-content">
+        <div class="logo-area">
+            <div class="logo-icon">🏡</div>
+            <div>
+                <h1 class="logo">Rate Your Neighbour</h1>
+                <span class="badge-private">Accès Résidents Uniquement</span>
+            </div>
+        </div>
+        <button class="btn btn-primary btn-login-trigger">Connexion</button>
+    </div>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="container hero-grid">
+            <div class="hero-text">
+                <div class="status-pill">● 42 voisins en ligne</div>
+                <h2 class="hero-title">La vie de quartier, en version <span class="highlight">Géniale.</span></h2>
+                <p class="hero-subtitle">Parce qu'un voisin qui prête sa tondeuse mérite 5 étoiles, et celui qui fait un BBQ à 2h du mat... un petit rappel.</p>
+                <div class="hero-btns">
+                    <button class="btn btn-primary btn-lg btn-login-trigger">Rejoindre le quartier</button>
+                    <button class="btn btn-secondary btn-lg" id="btn-discover">Voir l'ambiance</button>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="floating-elements">
+                    <div class="float-card bubble-1">"Merci pour les œufs ! 🍳"</div>
+                    <div class="float-card bubble-2">"Musique trop forte au N°4... 🤫"</div>
+                    <div class="float-card bubble-3">⭐⭐⭐⭐⭐</div>
+                </div>
+                <svg viewBox="0 0 500 400" class="residence-svg">
+                    <path d="M0,400 Q150,320 300,380 T500,350 L500,400 L0,400 Z" fill="#81c784" />
+                    <g class="house house-1">
+                        <rect x="180" y="280" width="70" height="70" rx="5" fill="#A1887F" />
+                        <path d="M170,280 L215,230 L260,280 Z" fill="#5D4037" />
+                        <rect x="205" y="315" width="20" height="35" fill="#FFECB3" />
+                        <circle cx="235" cy="300" r="8" fill="#FFF" opacity="0.5" />
+                    </g>
+                    <g class="sun"><circle cx="420" cy="80" r="35" fill="#FFD54F" /></g>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <section class="social-feed" id="features-section">
+        <div class="container">
+            <h3 class="section-title">Dernières activités au quartier 💬</h3>
+            <div class="feed-container">
+                <div class="feed-item">
+                    <div class="avatar">👴</div>
+                    <div class="feed-content">
+                        <strong>M. Bernard (Maison 12)</strong>
+                        <p>"A encore tondu sa pelouse à 7h un dimanche. Mais il nous a offert des tomates du jardin après, alors on pardonne."</p>
+                        <div class="feed-meta"><span>⭐ 3/5</span> • <span>Il y a 2h</span></div>
+                    </div>
+                </div>
+                <div class="feed-item highlighted">
+                    <div class="avatar">👩‍🍳</div>
+                    <div class="feed-content">
+                        <strong>Léa (Maison 5)</strong>
+                        <p>"A partagé ses cookies chocolat-noisette avec toute l'allée. Une légende vivante !"</p>
+                        <div class="feed-meta"><span>⭐ 5/5 + Badge Cookie-Master</span> • <span>Il y a 5h</span></div>
+                    </div>
+                </div>
+                <div class="feed-item">
+                    <div class="avatar">🎧</div>
+                    <div class="feed-content">
+                        <strong>Julien (Maison 22)</strong>
+                        <p>"A fait une fête techno hier. On a aimé la playlist, moins les basses dans le salon à minuit."</p>
+                        <div class="feed-meta"><span>⭐ 2/5</span> • <span>Hier</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="leaderboard">
+        <div class="container">
+            <div class="glass-card">
+                <h3>Le Top 3 des voisins modèles 🏆</h3>
+                <div class="ranking-list">
+                    <div class="rank-item">
+                        <span class="rank-num">1</span>
+                        <span class="rank-name">Famille Martin</span>
+                        <div class="rank-bar" style="width: 95%;"></div>
+                        <span class="rank-score">4.9</span>
+                    </div>
+                    <div class="rank-item">
+                        <span class="rank-num">2</span>
+                        <span class="rank-name">Mme Douce</span>
+                        <div class="rank-bar" style="width: 88%;"></div>
+                        <span class="rank-score">4.7</span>
+                    </div>
+                    <div class="rank-item">
+                        <span class="rank-num">3</span>
+                        <span class="rank-name">Thomas & Chloé</span>
+                        <div class="rank-bar" style="width: 82%;"></div>
+                        <span class="rank-score">4.5</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="fun-tool">
+        <div class="container">
+            <div class="tool-box">
+                <h4>Besoin de remonter la note d'un voisin ?</h4>
+                <p>Génère un compliment automatique pour son profil :</p>
+                <div id="compliment-display" class="compliment-text">"Clique sur le bouton pour voir..."</div>
+                <button class="btn btn-accent" id="gen-compliment">Générer une gentillesse 🌈</button>
+            </div>
+        </div>
+    </section>
+    <br>
+
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p><strong>Rate Your Neighbour</strong> - Plus qu'une appli, une famille (parfois bruyante).</p>
+        <p class="muted">Accès strictement réservé aux porteurs du badge de la résidence.</p>
+    </div>
+</footer>
+
+<div id="toast-container"></div>
+<script src="app.js"></script>
 </body>
 </html>
