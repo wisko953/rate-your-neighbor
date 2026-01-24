@@ -1,47 +1,41 @@
 const express = require('express');
 const cors = require('cors');
-// 1. IMPORTS SWAGGER
-const { swaggerUi, swaggerSpec } = require('./routes/docs');
-const swaggerJsDoc = require('swagger-jsdoc');
 
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 2. CONFIGURATION SWAGGER
-// Dans server.js
-
-const swaggerOptions = {
-    definition: {
-        openapi: '3.0.0',
-        info: {
-            title: 'Rate Your Neighbor API',
-            version: '1.0.0',
-            description: 'API de gestion de voisinage (Notes, Signalements, Expulsions)',
-        },
-        servers: [
-            { url: `http://localhost:${PORT}` }
-        ],
-    },
-    // AJOUTE LE CHEMIN VERS LE NOUVEAU FICHIER ICI
-    apis: ['./routes/neighbors.js', './routes/docs.js'], 
-};
-
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-
-// 3. ROUTE DE DOCUMENTATION
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
 // Routes métier
-const neighborsRoutes = require('./routes/neighbors');
-app.use('/api/neighbors', neighborsRoutes);
+const residencesRoutes = require('./routes/residences');
+const housesRoutes = require('./routes/houses');
+const usersRoutes = require('./routes/users');
+const occupantsRoutes = require('./routes/occupants');
+const reviewsRoutes = require('./routes/reviews');
+const reportsRoutes = require('./routes/reports');
+const eventsRoutes = require('./routes/events');
 
-// ... le reste de ton code (Health check, 404, etc.) ...
+app.use('/api/residences', residencesRoutes);
+app.use('/api/houses', housesRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/occupants', occupantsRoutes);
+app.use('/api/reviews', reviewsRoutes);
+app.use('/api/reports', reportsRoutes);
+app.use('/api/events', eventsRoutes);
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'API Métier is running' });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Endpoint non trouvé' });
+});
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`API Métier sur le port ${PORT}`);
