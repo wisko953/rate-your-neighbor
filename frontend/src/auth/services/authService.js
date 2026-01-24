@@ -35,4 +35,4 @@ export const authService = {
   },
 };
 
-export default api;
+export default authService;
