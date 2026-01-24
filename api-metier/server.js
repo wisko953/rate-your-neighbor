@@ -39,5 +39,4 @@ app.use((req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`API Métier sur le port ${PORT}`);
-  console.log(`Documentation Swagger disponible sur http://localhost:${PORT}/api-docs`);
 });
