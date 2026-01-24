@@ -1,27 +1,30 @@
 const mysql = require('mysql2/promise');
+require('dotenv').config();
 
-// Créer un pool de connexions MySQL
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'rate_user',
-  password: process.env.DB_PASSWORD || 'secure_password_123',
+  host: process.env.DB_HOST || 'mysql',
+  port: process.env.DB_PORT || 3306,
+  user: process.env.DB_USER || 'user',
+  password: process.env.DB_PASSWORD || 'password',
   database: process.env.DB_NAME || 'rate_your_neighbor',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
   enableKeepAlive: true,
-  keepAliveInitialDelayMs: 0,
+  keepAliveInitialDelay: 0
 });
 
-// Test de connexion au démarrage
-pool.getConnection()
-  .then(connection => {
-    console.log('✅ Connexion MySQL établie');
+const testConnection = async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log('API Métier connectée à MySQL');
     connection.release();
-  })
-  .catch(err => {
-    console.error('❌ Erreur de connexion MySQL:', err.message);
-    process.exit(1);
-  });
+  } catch (error) {
+    console.error('Erreur connexion MySQL:', error.message);
+    setTimeout(testConnection, 5000);
+  }
+};
+
+testConnection();
 
 module.exports = pool;
