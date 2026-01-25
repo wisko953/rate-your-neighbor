@@ -43,7 +43,7 @@ rate-your-neighbor/
 ### Étape 1 : Cloner le projet
 
 ```bash
-git clone <url-du-repo>
+git clone https://github.com/wisko953/rate-your-neighbor.git
 cd rate-your-neighbor
 ```
 
