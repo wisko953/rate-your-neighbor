@@ -18,6 +18,9 @@ const occupantsRoutes = require('./routes/occupants');
 const reviewsRoutes = require('./routes/reviews');
 const reportsRoutes = require('./routes/reports');
 const eventsRoutes = require('./routes/events');
+const { swaggerUi, swaggerSpec } = require('./routes/docs');
+
+require('dotenv').config();
 
 app.use('/api/residences', residencesRoutes);
 app.use('/api/houses', housesRoutes);
@@ -26,6 +29,8 @@ app.use('/api/occupants', occupantsRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/events', eventsRoutes);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Health check
 app.get('/api/health', (req, res) => {
