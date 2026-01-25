@@ -18,3 +18,19 @@ docker-compose up -d --build
 - API Gateway : http://localhost:4000/api
 - API Métier : http://localhost:5000/api
 - phpMyAdmin : http://localhost:8080
+
+## Charger les données de test (Fixtures)
+
+Pour remplir la base de données avec des données de démonstration :
+
+```bash
+.\load-fixtures.ps1
+```
+
+Les fixtures incluent :
+- 15 utilisateurs (admin, référents, utilisateurs)
+- 4 résidences dans différentes villes
+- 15 foyers avec 30 occupants
+- 26 avis et notes
+- 6 signalements
+- 9 événements avec participants
