@@ -10,7 +10,7 @@ Ensuite, **modifiez les valeurs** dans chaque `.env` (notamment `JWT_SECRET`, `D
 ## Lancement rapide avec Docker Compose
 
 ```bash
-docker-compose up -d --build
+docker-compose up
 ```
 
 **Accès aux services :**
