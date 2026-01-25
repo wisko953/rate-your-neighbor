@@ -39,7 +39,7 @@ export const userService = {
 
   isAdmin: async (userId) => {
     const user = await userService.getById(userId);
-    return !!user?.is_admin;
+    return user?.role === 'admin';
   },
 
   approveExpulsion: async (userId, houseId) => {

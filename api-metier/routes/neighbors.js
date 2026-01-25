@@ -218,7 +218,7 @@ router.delete('/houses/:id', async (req, res) => {
 // GET ALL - Récupérer tous les utilisateurs
 router.get('/users', async (req, res) => {
   try {
-    const [users] = await db.query('SELECT id, email, is_admin, is_referent, created_at FROM users');
+    const [users] = await db.query('SELECT id, email, role, created_at FROM users');
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
@@ -228,25 +228,23 @@ router.get('/users', async (req, res) => {
 // POST - Créer un nouvel utilisateur
 router.post('/users', async (req, res) => {
   try {
-    const { email, password_hash, is_admin, is_referent } = req.body;
+    const { email, password_hash, role } = req.body;
     
     if (!email) {
       return res.status(400).json({ message: 'email est requis' });
     }
 
-    const query = 'INSERT INTO users (email, password_hash, is_admin, is_referent) VALUES (?, ?, ?, ?)';
+    const query = 'INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)';
     const [result] = await db.query(query, [
       email,
       password_hash || null,
-      is_admin ? 1 : 0,
-      is_referent ? 1 : 0
+      role || 'user'
     ]);
 
     res.status(201).json({
       id: result.insertId,
       email,
-      is_admin: is_admin || false,
-      is_referent: is_referent || false
+      role: role || 'user'
     });
   } catch (error) {
     res.status(400).json({ message: 'Erreur lors de la création', error: error.message });
@@ -264,8 +262,8 @@ router.post('/users/:id/approve-expulsion', async (req, res) => {
     }
 
     // Vérifier que l'utilisateur est admin
-    const [users] = await db.query('SELECT is_admin FROM users WHERE id = ?', [userId]);
-    if (users.length === 0 || !users[0].is_admin) {
+    const [users] = await db.query('SELECT role FROM users WHERE id = ?', [userId]);
+    if (users.length === 0 || users[0].role !== 'admin') {
       return res.status(403).json({ message: 'Utilisateur non autorisé (Admin requis)' });
     }
 

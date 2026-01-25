@@ -31,6 +31,10 @@ export const reviewService = {
     const list = await reviewService.getAll();
     return list.filter((r) => r.submitter_user_id === userId);
   },
+
+  validateRating: (rating) => {
+    return rating >= 0 && rating <= 5;
+  }
 };
 
 export default reviewService;

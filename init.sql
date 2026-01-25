@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    role ENUM('user', 'admin') DEFAULT 'user',
+    role ENUM('user', 'admin', 'referent') DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    date DATETIME NOT NULL,
+    date DATETIME NULL,
     location VARCHAR(255),
     min_score_required DECIMAL(3, 1) DEFAULT 2.5,
     residence_id INT NOT NULL,
@@ -137,3 +137,46 @@ CREATE TABLE IF NOT EXISTS event_participants (
     INDEX idx_event_id (event_id),
     INDEX idx_occupant_id (occupant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- Views
+-- ========================================
+
+CREATE OR REPLACE VIEW occupant_scores AS
+SELECT 
+    o.id,
+    o.house_id,
+    o.firstname,
+    o.lastname,
+    COALESCE(AVG(r.rating), 2.5) as individual_score,
+    COUNT(r.id) as review_count
+FROM occupants o
+LEFT JOIN reviews r ON o.id = r.target_occupant_id
+GROUP BY o.id, o.house_id, o.firstname, o.lastname;
+
+CREATE OR REPLACE VIEW house_scores AS
+SELECT 
+    h.id,
+    h.residence_id,
+    h.address,
+    COALESCE(AVG(os.individual_score), 2.5) as household_score,
+    COUNT(DISTINCT o.id) as occupant_count
+FROM houses h
+LEFT JOIN occupants o ON h.id = o.house_id
+LEFT JOIN occupant_scores os ON o.id = os.id
+GROUP BY h.id, h.residence_id, h.address;
+
+CREATE OR REPLACE VIEW residence_leaderboards AS
+SELECT 
+    r.id as residence_id,
+    r.name as residence_name,
+    h.id as house_id,
+    h.address as house_address,
+    hs.household_score,
+    hs.occupant_count,
+    RANK() OVER (PARTITION BY r.id ORDER BY hs.household_score DESC) as ranking
+FROM residences r
+LEFT JOIN houses h ON r.id = h.residence_id
+LEFT JOIN house_scores hs ON h.id = hs.id
+WHERE h.id IS NOT NULL
+ORDER BY r.id, ranking;
