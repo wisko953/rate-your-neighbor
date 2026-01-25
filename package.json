@@ -1,0 +1,25 @@
+{
+  "name": "rate-your-neighbor",
+  "version": "1.0.0",
+  "description": "Application de reviews de voisinage avec attribution de récompenses / pénalitées",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wisko953/rate-your-neighbor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/wisko953/rate-your-neighbor/issues"
+  },
+  "homepage": "https://github.com/wisko953/rate-your-neighbor#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
