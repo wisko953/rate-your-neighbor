@@ -1,0 +1,396 @@
+:root {
+    --primary: #6ab04c;
+    --primary-dark: #41752c;
+    --brown: #795548;
+    --cream: #f9fbe7;
+    --white: #ffffff;
+    --accent: #ff7f50;
+    --glass: rgba(255, 255, 255, 0.7);
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--cream);
+    color: #2d3436;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Fredoka', sans-serif;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- Navbar (Glassmorphism) --- */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    padding: 15px 0;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    font-size: 2rem;
+}
+
+.logo {
+    font-size: 1.4rem;
+    color: var(--primary-dark);
+    margin: 0;
+}
+
+.badge-private {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--brown);
+}
+
+/* --- Hero Section --- */
+.hero {
+    padding: 60px 0;
+    position: relative;
+}
+
+.status-pill {
+    display: inline-block;
+    background: #dff9fb;
+    color: #0984e3;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    color: var(--brown);
+}
+
+.highlight {
+    color: var(--primary);
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    opacity: 0.8;
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+/* Bulles flottantes */
+.floating-elements {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.float-card {
+    position: absolute;
+    background: white;
+    padding: 10px 15px;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    font-weight: 700;
+    font-size: 0.9rem;
+    animation: float 4s ease-in-out infinite;
+}
+
+.bubble-1 {
+    top: 10%;
+    right: 10%;
+    background: #fff2f2;
+}
+
+.bubble-2 {
+    bottom: 20%;
+    left: 0%;
+    background: #f2f2ff;
+}
+
+.bubble-3 {
+    top: 40%;
+    right: 0%;
+    font-size: 1.5rem;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(-2deg);
+    }
+    50% {
+        transform: translateY(-20px) rotate(2deg);
+    }
+}
+
+/* --- Social Feed --- */
+.social-feed {
+    padding: 60px 0;
+    background: #fff;
+    border-radius: 50px 50px 0 0;
+}
+
+.feed-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* --- Animation Funky sur le Feed --- */
+
+.feed-item {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    border-radius: 25px; /* Plus arrondi pour l'effet bulle */
+    background: var(--white);
+    transition: all 0.5s cubic-bezier(0.68, -0.6, 0.32, 1.6); /* L'effet élastique */
+    cursor: pointer;
+    position: relative;
+    border: 3px solid transparent;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+/* L'animation au survol */
+.feed-item:hover {
+    transform: scale(1.08) rotate(-1.5deg); /* Grossit et penche légèrement */
+    background: #ffffff;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    border-color: var(--primary);
+    z-index: 10; /* Passe au dessus des autres */
+}
+
+/* On alterne le sens de rotation pour le côté asymétrique/funky */
+.feed-item:nth-child(even):hover {
+    transform: scale(1.08) rotate(1.5deg);
+}
+
+/* Animation de l'avatar au survol de la carte */
+.feed-item:hover .avatar {
+    transform: scale(1.2) rotate(10deg);
+    transition: transform 0.3s ease;
+}
+
+/* Style spécifique pour la carte déjà mise en avant */
+.feed-item.highlighted {
+    background: #f1f8e9;
+    border: 3px dashed var(--primary);
+}
+
+.feed-item.highlighted:hover {
+    border-style: solid;
+    background: #eafbe7;
+}
+
+/* Petit effet de "clic" quand on appuie dessus */
+.feed-item:active {
+    transform: scale(0.95);
+    transition: transform 0.1s;
+}
+
+.avatar {
+    font-size: 2.5rem;
+    background: white;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.feed-meta {
+    font-size: 0.8rem;
+    color: #95a5a6;
+    margin-top: 10px;
+    font-weight: 700;
+}
+
+/* --- Leaderboard --- */
+.leaderboard {
+    padding: 60px 0;
+}
+
+.glass-card {
+    background: var(--glass);
+    padding: 40px;
+    border-radius: 30px;
+    border: 1px solid white;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+}
+
+.ranking-list {
+    margin-top: 30px;
+}
+
+.rank-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.rank-num {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--primary);
+    width: 25px;
+}
+
+.rank-name {
+    font-weight: 700;
+    width: 150px;
+}
+
+.rank-bar {
+    height: 15px;
+    background: var(--primary);
+    border-radius: 10px;
+    position: relative;
+    transition: width 1s ease-out;
+}
+
+.rank-score {
+    font-weight: 800;
+    margin-left: auto;
+    color: var(--brown);
+}
+
+/* --- Tool Box --- */
+.tool-box {
+    text-align: center;
+    background: var(--brown);
+    color: white;
+    padding: 50px;
+    border-radius: 40px;
+}
+
+.compliment-text {
+    font-size: 1.5rem;
+    font-style: italic;
+    margin: 25px 0;
+    min-height: 60px;
+    color: var(--cream);
+}
+
+/* --- Buttons --- */
+.btn {
+    border: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 5px 0 var(--primary-dark);
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 0 var(--primary-dark);
+}
+
+.btn-primary:active {
+    transform: translateY(5px);
+    box-shadow: 0 0 0 var(--primary-dark);
+}
+
+.btn-accent {
+    background: var(--accent);
+    color: white;
+    font-size: 1.1rem;
+}
+
+/* --- Footer --- */
+.footer {
+    text-align: center;
+    padding: 60px 0;
+    background: #2d3436;
+    color: white;
+}
+
+.muted {
+    opacity: 0.5;
+    font-size: 0.8rem;
+    margin-top: 10px;
+}
+
+/* Toast & Responsivité */
+#toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2000;
+}
+
+.toast {
+    background: white;
+    padding: 15px 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-top: 10px;
+    border-left: 5px solid var(--primary);
+    animation: slideIn 0.5s ease forwards;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .hero-visual {
+        display: none;
+    }
+}
