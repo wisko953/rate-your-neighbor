@@ -135,20 +135,6 @@ export default function Home() {
                                 un petit rappel.
                             </p>
 
-                            <div className="hero-btns">
-                                <button
-                                    className="btn btn-primary btn-lg btn-login-trigger"
-                                    onClick={() => handleLoginTrigger("/register")}
-                                    type="button"
-                                >
-                                    Rejoindre le quartier
-                                </button>
-
-                                <button className="btn btn-secondary btn-lg" id="btn-discover" onClick={handleDiscover} type="button">
-                                    Voir l'ambiance
-                                </button>
-                            </div>
-
                             {/* Bonus: liens “propres” si tu veux aussi les afficher (facultatif) */}
                             <div style={{ marginTop: 14, display: "flex", gap: 12, flexWrap: "wrap" }}>
                                 <Link className="btn btn-primary" to="/register">Créer un compte</Link>
