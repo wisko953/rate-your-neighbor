@@ -1,281 +1,283 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { authService } from "../auth/services/authService";
+// frontend/src/pages/Dashboard.js
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { dashboardService } from "../services/dashboardService";
 
 export default function Dashboard() {
     const navigate = useNavigate();
 
-    const fallbackUser = useMemo(() => {
-        try {
-            return JSON.parse(localStorage.getItem("user") || "null");
-        } catch {
-            return null;
-        }
-    }, []);
-
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
     const [me, setMe] = useState(null);
     const [stats, setStats] = useState(null);
-    const [feed, setFeed] = useState([]);
     const [top3, setTop3] = useState([]);
-
-    const [warning, setWarning] = useState(""); // message si back partiel
-
-    const mockFeed = useMemo(
-        () => [
-            {
-                id: "m1",
-                emoji: "🍪",
-                title: "Badge du jour",
-                text: "“Cookie friendly” — parce que tu as rejoint le quartier.",
-                meta: "+10 points • Aujourd’hui",
-                highlighted: true,
-            },
-            {
-                id: "m2",
-                emoji: "🌿",
-                title: "Conseil du syndic",
-                text: "“Un petit bonjour dans l’ascenseur = +1 karma.”",
-                meta: "Info • Cette semaine",
-            },
-            {
-                id: "m3",
-                emoji: "⭐",
-                title: "Objectif",
-                text: "Laisse ta première review pour débloquer “Voisin actif”.",
-                meta: "Quête • À faire",
-            },
-        ],
-        []
-    );
+    const [feed, setFeed] = useState([]);
 
     useEffect(() => {
-        // ✅ protection: si pas loggé → login
-        if (!authService.isAuthenticated()) {
-            navigate("/login", { replace: true });
-            return;
-        }
+        const load = async () => {
+            try {
+                setLoading(true);
+                setError("");
 
-        const run = async () => {
-            setLoading(true);
-            setWarning("");
+                // user local (si ton dashboardService.getMe() lit localStorage par ex.)
+                const meRes = await dashboardService.getMe();
+                setMe(meRes);
 
-            // On essaye tout, mais on accepte que certaines routes n'existent pas
-            const results = await Promise.allSettled([
-                dashboardService.getMe(),
-                dashboardService.getMyStats(),
-                dashboardService.getFeed(5),
-                dashboardService.getTop3(),
-            ]);
+                // si pas connecté, on renvoie au login (optionnel)
+                // tu peux enlever ça si tu ne veux pas forcer
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    navigate("/login");
+                    return;
+                }
 
-            const [meRes, statsRes, feedRes, top3Res] = results;
+                const [statsRes, top3Res, feedRes] = await Promise.all([
+                    dashboardService.getMyStats(),
+                    dashboardService.getTop3(),
+                    dashboardService.getFeed(6),
+                ]);
 
-            // ME
-            if (meRes.status === "fulfilled") setMe(meRes.value);
-            else setMe(fallbackUser);
-
-            // STATS
-            if (statsRes.status === "fulfilled") setStats(statsRes.value);
-            else setStats(null);
-
-            // FEED
-            if (feedRes.status === "fulfilled") {
-                const data = feedRes.value;
-                // On accepte 2 formats: tableau direct, ou {items:[...]}
-                const items = Array.isArray(data) ? data : data?.items;
-                setFeed(Array.isArray(items) ? items : []);
-            } else {
-                setFeed([]);
-            }
-
-            // TOP3
-            if (top3Res.status === "fulfilled") {
-                const data = top3Res.value;
-                const items = Array.isArray(data) ? data : data?.items;
-                setTop3(Array.isArray(items) ? items : []);
-            } else {
-                setTop3([]);
-            }
-
-            // Si aucune donnée métier n’est revenue, on met un warning + mock
-            const anyMetierOk =
-                statsRes.status === "fulfilled" ||
-                feedRes.status === "fulfilled" ||
-                top3Res.status === "fulfilled";
-
-            if (!anyMetierOk) {
-                setWarning(
-                    "Le dashboard s’affiche, mais l’API métier ne renvoie pas encore les données (endpoints différents ou service non dispo)."
+                setStats(statsRes);
+                setTop3(top3Res || []);
+                setFeed(feedRes || []);
+            } catch (e) {
+                console.error("Dashboard load error:", e);
+                setError(
+                    e?.response?.data?.error ||
+                    e?.message ||
+                    "Erreur lors du chargement du dashboard."
                 );
+            } finally {
+                setLoading(false);
             }
-
-            setLoading(false);
         };
 
-        run();
-    }, [navigate, fallbackUser]);
+        load();
+    }, [navigate]);
 
-    const handleLogout = () => {
-        authService.logout();
-        navigate("/", { replace: true });
+    const prettyStatus = (badge) => {
+        if (!badge) return "—";
+        if (badge === "BONUS_ELIGIBLE") return "🌟 Bonus eligible";
+        if (badge === "COMPLIANT") return "✅ Compliant";
+        if (badge === "EXPULSION_WARNING") return "⚠️ Warning";
+        return badge;
     };
 
-    // helpers d’affichage tolérant
-    const displayName = me?.name || me?.username || me?.email || fallbackUser?.email || "voisin";
+    const logout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/login");
+    };
 
-    // Stats “tolérantes” (selon ce que renvoie le back)
-    const points = stats?.points ?? stats?.score ?? stats?.karma ?? null;
-    const rank = stats?.rank ?? stats?.position ?? null;
-    const badge = stats?.badge ?? stats?.title ?? null;
-
-    // Feed “tolérant” : on essaie de mapper plusieurs formats possibles
-    const normalizedFeed = useMemo(() => {
-        if (feed && feed.length) {
-            return feed.slice(0, 5).map((it, idx) => ({
-                id: it.id ?? it._id ?? `f${idx}`,
-                emoji: it.emoji ?? it.icon ?? "💬",
-                title: it.title ?? it.type ?? "Activité",
-                text: it.text ?? it.message ?? it.comment ?? JSON.stringify(it),
-                meta:
-                    it.meta ??
-                    it.createdAt ??
-                    it.date ??
-                    (it.rating ? `⭐ ${it.rating}/5` : "Récemment"),
-                highlighted: Boolean(it.highlighted),
-            }));
-        }
-        return mockFeed;
-    }, [feed, mockFeed]);
-
-    const top3Normalized = useMemo(() => {
-        if (top3 && top3.length) {
-            return top3.slice(0, 3).map((u, idx) => ({
-                id: u.id ?? u._id ?? `t${idx}`,
-                name: u.name ?? u.username ?? u.email ?? `Voisin ${idx + 1}`,
-                score: u.score ?? u.points ?? u.rating ?? u.karma ?? "",
-                // une “largeur” de barre approximative
-                bar: u.bar ?? Math.max(60, 95 - idx * 8),
-            }));
-        }
-        return [
-            { id: "t1", name: "Famille Martin", score: "4.9", bar: 95 },
-            { id: "t2", name: "Mme Douce", score: "4.7", bar: 88 },
-            { id: "t3", name: "Thomas & Chloé", score: "4.5", bar: 82 },
-        ];
-    }, [top3]);
+    if (loading) {
+        return (
+            <div style={styles.page}>
+                <div style={styles.card}>
+                    <h2 style={styles.title}>Dashboard</h2>
+                    <p style={styles.muted}>Chargement...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <>
-            <header className="navbar">
-                <div className="container nav-content">
-                    <div className="logo-area">
-                        <div className="logo-icon">🏡</div>
-                        <div>
-                            <h1 className="logo">Rate Your Neighbour</h1>
-                            <span className="badge-private">Espace Résident</span>
-                        </div>
-                    </div>
-
-                    <button className="btn btn-primary" onClick={handleLogout} type="button">
-                        Déconnexion
-                    </button>
+        <div style={styles.page}>
+            {/* Header */}
+            <div style={styles.headerRow}>
+                <div>
+                    <h2 style={styles.title}>Dashboard</h2>
+                    <p style={styles.muted}>
+                        Bienvenue{" "}
+                        {me?.firstname ? `${me.firstname} ${me.lastname || ""}` : "👋"}
+                    </p>
                 </div>
-            </header>
 
-            <main className="hero" style={{ paddingTop: 40 }}>
-                <div className="container">
-                    <div className="glass-card">
-                        <span className="status-pill">{loading ? "⏳ Chargement..." : "● Connecté"}</span>
+                <button onClick={logout} style={styles.btnDanger}>
+                    Logout
+                </button>
+            </div>
 
-                        <h2 className="hero-title" style={{ marginTop: 10 }}>
-                            Bienvenue <span className="highlight">{displayName}</span>
-                        </h2>
+            {error && (
+                <div style={{ ...styles.card, border: "1px solid #ffbdbd" }}>
+                    <p style={{ margin: 0, color: "#b00020" }}>
+                        <b>Erreur :</b> {error}
+                    </p>
+                    <p style={{ marginTop: 8, ...styles.muted }}>
+                        Vérifie que l’API métier répond et que REACT_APP_API_METIER_URL est
+                        correct.
+                    </p>
+                </div>
+            )}
 
-                        <p className="hero-subtitle">
-                            {badge ? `Badge: ${badge}. ` : ""}
-                            {points != null ? `Points: ${points}. ` : ""}
-                            {rank != null ? `Rang: #${rank}. ` : ""}
-                            {points == null && rank == null && !badge ? "Ton quartier t’attend 😄" : ""}
-                        </p>
+            {/* Stats */}
+            <div style={styles.grid3}>
+                <div style={styles.card}>
+                    <p style={styles.smallLabel}>Score</p>
+                    <p style={styles.bigNumber}>
+                        {stats?.points !== null && stats?.points !== undefined
+                            ? Number(stats.points).toFixed(2)
+                            : "—"}
+                    </p>
+                    <p style={styles.muted}>Score actuel de ton foyer</p>
+                </div>
 
-                        {warning && (
-                            <div className="feed-item highlighted" style={{ marginTop: 14 }}>
-                                <div className="avatar">⚠️</div>
-                                <div className="feed-content">
-                                    <strong>Info</strong>
-                                    <p>{warning}</p>
-                                    <div className="feed-meta">
-                                        Astuce: vérifie les routes de l’API métier dans dashboardService.js
-                                    </div>
+                <div style={styles.card}>
+                    <p style={styles.smallLabel}>Classement</p>
+                    <p style={styles.bigNumber}>{stats?.rank ?? "—"}</p>
+                    <p style={styles.muted}>Ta position dans ta résidence</p>
+                </div>
+
+                <div style={styles.card}>
+                    <p style={styles.smallLabel}>Statut</p>
+                    <p style={{ ...styles.bigNumber, fontSize: 22 }}>
+                        {prettyStatus(stats?.badge)}
+                    </p>
+                    <p style={styles.muted}>
+                        Occupants : {stats?.occupantCount ?? "—"}
+                    </p>
+                </div>
+            </div>
+
+            {/* Top 3 */}
+            <div style={styles.card}>
+                <h3 style={styles.sectionTitle}>🏆 Top 3 (résidence)</h3>
+
+                {top3.length === 0 ? (
+                    <p style={styles.muted}>Aucune donnée de leaderboard.</p>
+                ) : (
+                    <div style={styles.topList}>
+                        {top3.map((h, idx) => (
+                            <div key={h.id || idx} style={styles.topItem}>
+                                <div style={styles.rankCircle}>{idx + 1}</div>
+                                <div style={{ flex: 1 }}>
+                                    <p style={styles.topName}>{h.name || "Maison"}</p>
+                                    <p style={styles.muted}>
+                                        Score :{" "}
+                                        {h.score !== null && h.score !== undefined
+                                            ? Number(h.score).toFixed(2)
+                                            : "—"}
+                                    </p>
                                 </div>
                             </div>
-                        )}
-
-                        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 18 }}>
-                            <Link className="btn btn-primary" to="/">
-                                Accueil
-                            </Link>
-                            <Link className="btn btn-accent" to="/neighbors">
-                                Voir les voisins
-                            </Link>
-                            <Link className="btn btn-secondary" to="/reviews/new">
-                                Noter un voisin
-                            </Link>
-                            <Link className="btn btn-secondary" to="/my-reviews">
-                                Mes reviews
-                            </Link>
-                        </div>
+                        ))}
                     </div>
+                )}
+            </div>
 
-                    <div style={{ height: 20 }} />
+            {/* Feed */}
+            <div style={styles.card}>
+                <h3 style={styles.sectionTitle}>📰 Activité récente</h3>
 
-                    <section className="social-feed">
-                        <div className="container" style={{ padding: 0 }}>
-                            <h3 className="section-title">Activité récente 💬</h3>
-
-                            <div className="feed-container">
-                                {normalizedFeed.map((it) => (
-                                    <div key={it.id} className={`feed-item ${it.highlighted ? "highlighted" : ""}`}>
-                                        <div className="avatar">{it.emoji}</div>
-                                        <div className="feed-content">
-                                            <strong>{it.title}</strong>
-                                            <p>{it.text}</p>
-                                            <div className="feed-meta">{it.meta}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    <div style={{ height: 20 }} />
-
-                    <section className="leaderboard">
-                        <div className="container" style={{ padding: 0 }}>
-                            <div className="glass-card">
-                                <h3>Top 3 du quartier 🏆</h3>
-                                <div className="ranking-list">
-                                    {top3Normalized.map((u, idx) => (
-                                        <div className="rank-item" key={u.id}>
-                                            <span className="rank-num">{idx + 1}</span>
-                                            <span className="rank-name">{u.name}</span>
-                                            <div className="rank-bar" style={{ width: `${u.bar}%` }} />
-                                            <span className="rank-score">{u.score}</span>
-                                        </div>
-                                    ))}
+                {feed.length === 0 ? (
+                    <p style={styles.muted}>Aucune activité pour l’instant.</p>
+                ) : (
+                    <div style={styles.feedList}>
+                        {feed.map((item) => (
+                            <div
+                                key={item.id}
+                                style={{
+                                    ...styles.feedItem,
+                                    border: item.highlighted
+                                        ? "1px solid #b7ffcf"
+                                        : "1px solid #eee",
+                                }}
+                            >
+                                <div style={styles.feedEmoji}>{item.emoji || "•"}</div>
+                                <div style={{ flex: 1 }}>
+                                    <p style={styles.feedTitle}>
+                                        {item.title || "Activité"}{" "}
+                                        {item.highlighted ? <span>✨</span> : null}
+                                    </p>
+                                    <p style={{ margin: "6px 0" }}>{item.text || ""}</p>
+                                    <p style={styles.muted}>{item.meta || ""}</p>
                                 </div>
                             </div>
-                        </div>
-                    </section>
-                </div>
-            </main>
-
-            <footer className="footer">
-                <div className="container">
-                    <p className="muted">Tu es dans le club. Sois gentil 😄</p>
-                </div>
-            </footer>
-        </>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }
+
+const styles = {
+    page: {
+        maxWidth: 1000,
+        margin: "0 auto",
+        padding: 20,
+        fontFamily: "Arial, sans-serif",
+    },
+    headerRow: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        marginBottom: 16,
+    },
+    title: { margin: 0 },
+    sectionTitle: { marginTop: 0, marginBottom: 12 },
+    muted: { color: "#666", margin: "6px 0" },
+    smallLabel: { margin: 0, color: "#777", fontSize: 13 },
+    bigNumber: { margin: "6px 0", fontSize: 28, fontWeight: "bold" },
+
+    grid3: {
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 12,
+        marginBottom: 12,
+    },
+
+    card: {
+        background: "#fff",
+        border: "1px solid #eee",
+        borderRadius: 10,
+        padding: 16,
+        boxShadow: "0 1px 8px rgba(0,0,0,0.04)",
+        marginBottom: 12,
+    },
+
+    btnDanger: {
+        border: "none",
+        padding: "10px 14px",
+        borderRadius: 8,
+        cursor: "pointer",
+        background: "#c62828",
+        color: "white",
+        fontWeight: "bold",
+    },
+
+    topList: { display: "flex", flexDirection: "column", gap: 10 },
+    topItem: {
+        display: "flex",
+        gap: 12,
+        alignItems: "center",
+        padding: 10,
+        borderRadius: 8,
+        border: "1px solid #eee",
+    },
+    rankCircle: {
+        width: 34,
+        height: 34,
+        borderRadius: 999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontWeight: "bold",
+        border: "1px solid #ddd",
+    },
+    topName: { margin: 0, fontWeight: "bold" },
+
+    feedList: { display: "flex", flexDirection: "column", gap: 10 },
+    feedItem: {
+        display: "flex",
+        gap: 12,
+        alignItems: "flex-start",
+        padding: 12,
+        borderRadius: 8,
+        background: "#fafafa",
+    },
+    feedEmoji: { fontSize: 22, width: 28, textAlign: "center" },
+    feedTitle: { margin: 0, fontWeight: "bold" },
+};
