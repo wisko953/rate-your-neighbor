@@ -3,38 +3,37 @@ import { apiMetier } from '../../services/api';
 // Service pour les résidences
 export const residenceService = {
   create: async (residenceData) => {
-    const response = await apiMetier.post('/neighbors/residences', residenceData);
+    const response = await apiMetier.post('/residences', residenceData);
     return response.data;
   },
 
   getAll: async () => {
-    const response = await apiMetier.get('/neighbors/residences');
+    const response = await apiMetier.get('/residences');
     return response.data;
   },
 
   getById: async (id) => {
-    const response = await apiMetier.get(`/neighbors/residences/${id}`);
-    return response.data;
+    const list = await residenceService.getAll();
+    return list.find((r) => r.id === id) || null;
   },
 
   update: async (id, residenceData) => {
-    const response = await apiMetier.put(`/neighbors/residences/${id}`, residenceData);
-    return response.data;
+    throw new Error('Mise à jour de résidence non supportée par l’API');
   },
 
   delete: async (id) => {
-    const response = await apiMetier.delete(`/neighbors/residences/${id}`);
+    const response = await apiMetier.delete(`/residences/${id}`);
     return response.data;
   },
 
   getLeaderboard: async (id) => {
-    const response = await apiMetier.get(`/neighbors/residences/${id}/leaderboard`);
+    const response = await apiMetier.get(`/residences/${id}/leaderboard`);
     return response.data;
   },
 
   getHouses: async (id) => {
-    const response = await apiMetier.get(`/neighbors/residences/${id}/houses`);
-    return response.data;
+    const { data } = await apiMetier.get('/houses');
+    return data.filter((h) => h.residence_id === id);
   }
 };
 
