@@ -7,7 +7,7 @@ Application web de notation de voisinage permettant aux résidents d'évaluer le
 ```
 rate-your-neighbor/
 │
-├── 📁 api-gateway/              # Authentification & routing
+├── 📁 api-login/                # Authentification & routing
 │   ├── config/                  # Configuration BDD
 │   ├── routes/                  # Routes auth
 │   ├── Dockerfile
@@ -65,7 +65,7 @@ DB_PORT=3306
 JWT_SECRET=votre_secret_super_securise_a_changer_123456789
 ```
 
-#### 2️⃣ Dans `api-gateway/.env`
+#### 2️⃣ Dans `api-login/.env`
 
 ```env
 PORT=4000
@@ -98,7 +98,7 @@ REACT_APP_API_METIER_URL=http://localhost:5000/api
 ```
 
 > ⚠️ **IMPORTANT** : 
-> - Modifiez `JWT_SECRET` avec la **même valeur** dans les 3 fichiers (racine, api-gateway, api-metier)
+> - Modifiez `JWT_SECRET` avec la **même valeur** dans les 3 fichiers (racine, api-login, api-metier)
 > - Modifiez `DB_PASSWORD` et `DB_ROOT_PASSWORD` si nécessaire
 
 ## 🚀 Lancement de l'application
@@ -115,7 +115,7 @@ Une fois les conteneurs démarrés :
 | Service | URL | Description |
 |---------|-----|-------------|
 | **Frontend** | http://localhost:3000 | Interface utilisateur React |
-| **API Gateway** | http://localhost:4000/api | API d'authentification |
+| **API Login** | http://localhost:4000/api | API d'authentification |
 | **API Métier** | http://localhost:5000/api | API métier (CRUD) |
 | **Swagger Docs** | http://localhost:5000/api-docs | Documentation API |
 | **phpMyAdmin** | http://localhost:8080 | Administration BDD |
