@@ -13,7 +13,7 @@ function getLocalUser() {
 export const dashboardService = {
     /**
      * Ici, "me" vient du localStorage (car l'API métier n'a pas /me).
-     * Le vrai backend d'auth est dans api-gateway.
+     * Le vrai backend d'auth est dans api-login.
      */
     async getMe() {
         return getLocalUser();

@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_GATEWAY_URL = process.env.REACT_APP_API_GATEWAY_URL || process.env.API_GATEWAY_URL;
 const API_METIER_URL = process.env.REACT_APP_API_METIER_URL || process.env.API_METIER_URL;
 
-// Instance pour l'API Gateway (authentification)
+// Instance pour l'API Login (authentification)
 const apiGateway = axios.create({
   baseURL: API_GATEWAY_URL,
   headers: {
